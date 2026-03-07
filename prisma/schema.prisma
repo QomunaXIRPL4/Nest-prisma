@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Book {
+  id        Int      @id @default(autoincrement())
+  title     String
+  author    String
+  year      Int
+  borrows   Borrow[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Borrow {
+  id          Int       @id @default(autoincrement())
+  studentId   Int
+  bookId      Int
+  borrowedAt  DateTime  @default(now())
+  dueAt DateTime @default(now())
+  returnedAt  DateTime?
+
+  student Student @relation(fields: [studentId], references: [id])
+  book    Book    @relation(fields: [bookId], references: [id])
+}
+
+
+enum UserRole {
+  ADMIN
+  PETUGAS
+  STUDENT
+}
+
+model Student {
+  id        Int      @id @default(autoincrement())
+  nis       String   @unique
+  name      String
+  email     String?  @unique
+  kelas     String
+  jurusan   String
+
+  user      User?    
+  borrows   Borrow[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  password  String
+  role      UserRole
+
+  studentId Int?     @unique   
+  student   Student? @relation(fields: [studentId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
